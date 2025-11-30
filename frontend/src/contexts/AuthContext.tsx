@@ -126,7 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const register = async (email: string, username: string, password: string, fullName?: string) => {
+  const register = async (_email: string, _username: string, _password: string, _fullName?: string) => {
     // Registro público desabilitado - apenas admin pode criar usuários
     throw new Error("Registro público desabilitado. Apenas administradores podem criar usuários.");
   };
