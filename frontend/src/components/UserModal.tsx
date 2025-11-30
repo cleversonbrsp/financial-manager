@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { usersAPI, User } from '../services/api';
-import { X, Shield, User as UserIcon } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface UserModalProps {
   user?: User | null;

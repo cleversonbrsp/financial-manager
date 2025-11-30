@@ -127,9 +127,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const register = async (email: string, username: string, password: string, fullName?: string) => {
-    await authAPI.register(email, username, password, fullName);
-    // Após registro, fazer login automaticamente
-    await login(username, password);
+    // Registro público desabilitado - apenas admin pode criar usuários
+    throw new Error("Registro público desabilitado. Apenas administradores podem criar usuários.");
   };
 
   const logout = async () => {
