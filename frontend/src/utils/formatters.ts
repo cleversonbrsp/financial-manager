@@ -1,0 +1,18 @@
+export function formatCurrency(value: number): string {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(value);
+}
+
+export function formatDate(date: string): string {
+  return new Date(date).toLocaleDateString('pt-BR');
+}
+
+export function formatDateShort(date: string): string {
+  return new Date(date).toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: 'short',
+  });
+}
+
