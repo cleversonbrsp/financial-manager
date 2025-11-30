@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { usersAPI, User } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
-import { Plus, Edit, Trash2, CheckCircle, XCircle, Search } from 'lucide-react';
+import { Plus, Edit, Trash2, Shield, User as UserIcon, UserCheck, UserX } from 'lucide-react';
 import UserModal from '../components/UserModal';
 
 export default function Users() {
