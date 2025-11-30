@@ -38,7 +38,7 @@ python3 create_admin.py
 **Credenciais padrão:**
 - Username: `admin`
 - Email: `admin@financial-manager.com`
-- Senha: `AdminPassword@123`
+- Senha: `admin`
 
 ⚠️ **IMPORTANTE**: Altere a senha após o primeiro login!
 
