@@ -27,7 +27,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app/ ./app/
 
 # Copiar scripts de inicialização
-COPY create_admin.py init_db.py ./
+COPY create_admin.py init_db.py test_login.py ./
 
 # Criar diretório para banco de dados
 RUN mkdir -p /app/data

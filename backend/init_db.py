@@ -34,10 +34,19 @@ def init_database():
         
         # Criar usuário admin
         print("\n👤 Criando usuário admin padrão...")
+        
+        # Gerar hash da senha
+        password_hash = get_password_hash("admin")
+        
+        # Verificar se o hash funciona antes de salvar
+        from app.auth import verify_password
+        if not verify_password("admin", password_hash):
+            print("⚠️  Aviso: Hash da senha não passou na verificação inicial, mas continuando...")
+        
         admin_user = User(
             email="admin@financial-manager.com",
             username="admin",
-            hashed_password=get_password_hash("admin"),
+            hashed_password=password_hash,
             full_name="Administrador",
             is_active=True,
             is_superuser=True,
@@ -47,7 +56,13 @@ def init_database():
         db.commit()
         db.refresh(admin_user)
         
-        print("✅ Usuário admin criado com sucesso!")
+        # Verificar se a senha funciona após salvar
+        test_user = db.query(User).filter(User.id == admin_user.id).first()
+        if test_user and verify_password("admin", test_user.hashed_password):
+            print("✅ Usuário admin criado e senha verificada com sucesso!")
+        else:
+            print("⚠️  Usuário admin criado, mas verificação da senha falhou. Pode ser necessário recriar.")
+        
         print(f"\n📋 Credenciais:")
         print(f"   Email: admin@financial-manager.com")
         print(f"   Username: admin")
