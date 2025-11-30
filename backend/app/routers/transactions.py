@@ -73,10 +73,6 @@ def create_transaction(
 ):
     """Criar nova transação"""
     try:
-        print(f"DEBUG: Recebendo transação: {transaction.model_dump()}")
-        print(f"DEBUG: Tipo recebido: {transaction.type}, Tipo do objeto: {type(transaction.type)}")
-        print(f"DEBUG: Subtype recebido: {transaction.subtype}, Tipo: {type(transaction.subtype)}")
-        
         # Garantir que o tipo seja uma string válida
         if isinstance(transaction.type, TransactionType):
             transaction_type_value = transaction.type.value
@@ -97,9 +93,6 @@ def create_transaction(
             else:
                 subtype_value = str(transaction.subtype).strip() if str(transaction.subtype).strip() else None
         
-        print(f"DEBUG: Subtype processado: {subtype_value}")
-        print(f"DEBUG: Criando transação com: type={transaction_type_value}, subtype={subtype_value}, description={transaction.description}, amount={transaction.amount}, date={transaction.date}")
-        
         db_transaction = Transaction(
             type=transaction_type_value,
             subtype=subtype_value,
@@ -109,13 +102,9 @@ def create_transaction(
             category=(transaction.category or "Other").strip(),
             notes=transaction.notes.strip() if transaction.notes else None
         )
-        print(f"DEBUG: Objeto Transaction criado, adicionando ao banco...")
         db.add(db_transaction)
-        print(f"DEBUG: Fazendo commit...")
         db.commit()
-        print(f"DEBUG: Fazendo refresh...")
         db.refresh(db_transaction)
-        print(f"DEBUG: Transação criada com sucesso: ID {db_transaction.id}")
         return db_transaction
     except Exception as e:
         db.rollback()
