@@ -104,22 +104,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (username: string, password: string) => {
-    const response = await authAPI.login(username, password);
-    const accessToken = response.data.access_token;
-    const refreshTokenValue = response.data.refresh_token;
-    
-    // Salvar tokens
-    setToken(accessToken);
-    setRefreshToken(refreshTokenValue);
-    localStorage.setItem('access_token', accessToken);
-    localStorage.setItem('refresh_token', refreshTokenValue);
-    
-    // Obter dados do usuário passando o token diretamente
     try {
+      console.log('🔐 AuthContext: Iniciando login...');
+      const response = await authAPI.login(username, password);
+      console.log('✅ AuthContext: Login response recebida:', response.status);
+      
+      const accessToken = response.data.access_token;
+      const refreshTokenValue = response.data.refresh_token;
+      
+      if (!accessToken || !refreshTokenValue) {
+        throw new Error('Tokens não recebidos na resposta');
+      }
+      
+      // Salvar tokens
+      setToken(accessToken);
+      setRefreshToken(refreshTokenValue);
+      localStorage.setItem('access_token', accessToken);
+      localStorage.setItem('refresh_token', refreshTokenValue);
+      
+      // Obter dados do usuário passando o token diretamente
+      console.log('👤 AuthContext: Obtendo dados do usuário...');
       const userResponse = await authAPI.getMe(accessToken);
+      console.log('✅ AuthContext: Dados do usuário recebidos:', userResponse.data.username);
       setUser(userResponse.data);
     } catch (error: any) {
-      console.error('Erro ao obter dados do usuário após login:', error);
+      console.error('❌ AuthContext: Erro no login:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+      });
       // Se falhar, limpar tokens e relançar erro
       clearAuth();
       throw error;

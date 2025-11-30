@@ -156,10 +156,22 @@ export const authAPI = {
     const params = new URLSearchParams();
     params.append('username', username);
     params.append('password', password);
+    console.log('🔐 Tentando login:', { username, baseURL: api.defaults.baseURL });
     return api.post('/auth/login', params, {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
+    }).then(response => {
+      console.log('✅ Login bem-sucedido:', response.status);
+      return response;
+    }).catch(error => {
+      console.error('❌ Erro no login:', {
+        message: error.message,
+        response: error.response?.data,
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+      });
+      throw error;
     });
   },
   refreshToken: (refreshToken: string) =>
