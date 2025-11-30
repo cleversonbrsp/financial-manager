@@ -7,6 +7,10 @@ echo "🚀 Inicializando Financial Manager Backend..."
 echo "📦 Inicializando banco de dados..."
 python3 init_db.py
 
+# Executar migração para adicionar user_id às transações (se necessário)
+echo "🔄 Executando migração de user_id..."
+python3 migrate_add_user_id.py
+
 # Testar login do admin
 echo ""
 echo "🧪 Testando login do admin..."

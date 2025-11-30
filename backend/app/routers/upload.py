@@ -72,6 +72,7 @@ async def upload_excel(
                 category = categorize_transaction(str(destino))
                 
                 transaction = Transaction(
+                    user_id=current_user.id,  # Associar transação ao usuário logado
                     type="expense",
                     description=str(destino),
                     amount=float(valor_saida),
@@ -102,6 +103,7 @@ async def upload_excel(
                 category = categorize_transaction(str(origem))
                 
                 transaction = Transaction(
+                    user_id=current_user.id,  # Associar transação ao usuário logado
                     type="income",
                     description=str(origem),
                     amount=float(valor_sangria),

@@ -27,8 +27,8 @@ def generate_pdf_report(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """Gerar relatório em PDF"""
-    query = db.query(Transaction)
+    """Gerar relatório em PDF do usuário logado"""
+    query = db.query(Transaction).filter(Transaction.user_id == current_user.id)
     
     if start_date:
         query = query.filter(Transaction.date >= start_date)
@@ -144,10 +144,11 @@ def generate_excel_report(
     end_date: Optional[date] = Query(None),
     transaction_type: Optional[TransactionType] = Query(None),
     category: Optional[str] = Query(None),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
 ):
-    """Gerar relatório em Excel"""
-    query = db.query(Transaction)
+    """Gerar relatório em Excel do usuário logado"""
+    query = db.query(Transaction).filter(Transaction.user_id == current_user.id)
     
     if start_date:
         query = query.filter(Transaction.date >= start_date)

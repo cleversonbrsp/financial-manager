@@ -39,8 +39,8 @@ def get_transactions(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """Buscar todas as transações com filtros opcionais"""
-    query = db.query(Transaction)
+    """Buscar todas as transações do usuário logado com filtros opcionais"""
+    query = db.query(Transaction).filter(Transaction.user_id == current_user.id)
     
     if transaction_type:
         type_value = transaction_type.value if isinstance(transaction_type, TransactionType) else str(transaction_type)
@@ -56,9 +56,16 @@ def get_transactions(
     return transactions
 
 @router.get("/{transaction_id}", response_model=TransactionSchema)
-def get_transaction(transaction_id: int, db: Session = Depends(get_db)):
-    """Buscar uma transação específica"""
-    transaction = db.query(Transaction).filter(Transaction.id == transaction_id).first()
+def get_transaction(
+    transaction_id: int,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
+    """Buscar uma transação específica do usuário logado"""
+    transaction = db.query(Transaction).filter(
+        Transaction.id == transaction_id,
+        Transaction.user_id == current_user.id
+    ).first()
     if not transaction:
         raise HTTPException(status_code=404, detail="Transaction not found")
     return transaction
@@ -94,6 +101,7 @@ def create_transaction(
                 subtype_value = str(transaction.subtype).strip() if str(transaction.subtype).strip() else None
         
         db_transaction = Transaction(
+            user_id=current_user.id,  # Associar transação ao usuário logado
             type=transaction_type_value,
             subtype=subtype_value,
             description=transaction.description.strip() if transaction.description else "",
@@ -124,8 +132,11 @@ def update_transaction(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """Atualizar transação existente"""
-    db_transaction = db.query(Transaction).filter(Transaction.id == transaction_id).first()
+    """Atualizar transação existente do usuário logado"""
+    db_transaction = db.query(Transaction).filter(
+        Transaction.id == transaction_id,
+        Transaction.user_id == current_user.id
+    ).first()
     if not db_transaction:
         raise HTTPException(status_code=404, detail="Transaction not found")
     
@@ -145,8 +156,11 @@ def delete_transaction(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """Deletar transação"""
-    db_transaction = db.query(Transaction).filter(Transaction.id == transaction_id).first()
+    """Deletar transação do usuário logado"""
+    db_transaction = db.query(Transaction).filter(
+        Transaction.id == transaction_id,
+        Transaction.user_id == current_user.id
+    ).first()
     if not db_transaction:
         raise HTTPException(status_code=404, detail="Transaction not found")
     

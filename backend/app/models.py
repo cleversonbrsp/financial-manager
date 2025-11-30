@@ -29,6 +29,7 @@ class Transaction(Base):
     __tablename__ = "transactions"
     
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, nullable=False, index=True)  # Associar transação ao usuário
     type = Column(String(20), nullable=False)  # expense, income
     subtype = Column(String(30), nullable=True)  # fixed, sporadic, investment, received
     description = Column(String, nullable=False)  # Destino/Origem

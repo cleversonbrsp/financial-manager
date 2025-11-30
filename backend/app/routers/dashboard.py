@@ -18,10 +18,11 @@ def get_dashboard_stats(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """Obter estatísticas do dashboard"""
-    # Totais respeitando filtros de data
+    """Obter estatísticas do dashboard do usuário logado"""
+    # Totais respeitando filtros de data e usuário
     total_income = db.query(func.sum(Transaction.amount)).filter(
-        Transaction.type == "income"
+        Transaction.type == "income",
+        Transaction.user_id == current_user.id
     )
     if start_date:
         total_income = total_income.filter(Transaction.date >= start_date)
@@ -30,7 +31,8 @@ def get_dashboard_stats(
     total_income = total_income.scalar() or 0.0
     
     total_expense = db.query(func.sum(Transaction.amount)).filter(
-        Transaction.type == "expense"
+        Transaction.type == "expense",
+        Transaction.user_id == current_user.id
     )
     if start_date:
         total_expense = total_expense.filter(Transaction.date >= start_date)
@@ -43,7 +45,8 @@ def get_dashboard_stats(
     # Gastos fixos
     fixed_expenses = db.query(func.sum(Transaction.amount)).filter(
         Transaction.type == "expense",
-        Transaction.subtype == "fixed"
+        Transaction.subtype == "fixed",
+        Transaction.user_id == current_user.id
     )
     if start_date:
         fixed_expenses = fixed_expenses.filter(Transaction.date >= start_date)
@@ -54,7 +57,8 @@ def get_dashboard_stats(
     # Gastos esporádicos
     sporadic_expenses = db.query(func.sum(Transaction.amount)).filter(
         Transaction.type == "expense",
-        Transaction.subtype == "sporadic"
+        Transaction.subtype == "sporadic",
+        Transaction.user_id == current_user.id
     )
     if start_date:
         sporadic_expenses = sporadic_expenses.filter(Transaction.date >= start_date)
@@ -65,7 +69,8 @@ def get_dashboard_stats(
     # Investimentos
     investments = db.query(func.sum(Transaction.amount)).filter(
         Transaction.type == "income",
-        Transaction.subtype == "investment"
+        Transaction.subtype == "investment",
+        Transaction.user_id == current_user.id
     )
     if start_date:
         investments = investments.filter(Transaction.date >= start_date)
@@ -81,12 +86,14 @@ def get_dashboard_stats(
     
     monthly_income = db.query(func.sum(Transaction.amount)).filter(
         Transaction.type == "income",
+        Transaction.user_id == current_user.id,
         Transaction.date >= month_start,
         Transaction.date <= month_end
     ).scalar() or 0.0
     
     monthly_expense = db.query(func.sum(Transaction.amount)).filter(
         Transaction.type == "expense",
+        Transaction.user_id == current_user.id,
         Transaction.date >= month_start,
         Transaction.date <= month_end
     ).scalar() or 0.0
@@ -98,7 +105,10 @@ def get_dashboard_stats(
     expense_query = db.query(
         Transaction.category,
         func.sum(Transaction.amount).label('total')
-    ).filter(Transaction.type == "expense")
+    ).filter(
+        Transaction.type == "expense",
+        Transaction.user_id == current_user.id
+    )
     if start_date:
         expense_query = expense_query.filter(Transaction.date >= start_date)
     if end_date:
@@ -113,7 +123,10 @@ def get_dashboard_stats(
     income_query = db.query(
         Transaction.category,
         func.sum(Transaction.amount).label('total')
-    ).filter(Transaction.type == "income")
+    ).filter(
+        Transaction.type == "income",
+        Transaction.user_id == current_user.id
+    )
     if start_date:
         income_query = income_query.filter(Transaction.date >= start_date)
     if end_date:
@@ -135,12 +148,14 @@ def get_dashboard_stats(
         
         month_income = db.query(func.sum(Transaction.amount)).filter(
             Transaction.type == "income",
+            Transaction.user_id == current_user.id,
             Transaction.date >= month_start,
             Transaction.date <= month_end
         ).scalar() or 0.0
         
         month_expense = db.query(func.sum(Transaction.amount)).filter(
             Transaction.type == "expense",
+            Transaction.user_id == current_user.id,
             Transaction.date >= month_start,
             Transaction.date <= month_end
         ).scalar() or 0.0
@@ -153,8 +168,8 @@ def get_dashboard_stats(
     
     monthly_trend.reverse()
     
-    # Transações recentes (respeitando filtros)
-    recent_query = db.query(Transaction)
+    # Transações recentes (respeitando filtros e usuário)
+    recent_query = db.query(Transaction).filter(Transaction.user_id == current_user.id)
     if start_date:
         recent_query = recent_query.filter(Transaction.date >= start_date)
     if end_date:
@@ -199,6 +214,7 @@ def calculate_hourly_values(
     # Buscar total recebido no mês (subtype = "received" ou type = "income")
     total_received = db.query(func.sum(Transaction.amount)).filter(
         Transaction.type == "income",
+        Transaction.user_id == current_user.id,
         Transaction.date >= month_start,
         Transaction.date <= month_end
     ).scalar() or 0.0
