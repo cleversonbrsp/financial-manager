@@ -12,9 +12,6 @@ api.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
-    console.log('🔑 Token adicionado ao header:', token.substring(0, 20) + '...');
-  } else {
-    console.log('⚠️  Nenhum token encontrado no localStorage');
   }
   return config;
 });
@@ -165,8 +162,6 @@ export const authAPI = {
       },
     });
   },
-  register: (email: string, username: string, password: string, fullName?: string) =>
-    api.post('/auth/register', { email, username, password, full_name: fullName }),
   refreshToken: (refreshToken: string) =>
     api.post('/auth/refresh', { refresh_token: refreshToken }),
   logout: (refreshToken: string) =>
@@ -182,6 +177,25 @@ export const authAPI = {
     }
     return api.get('/auth/me');
   },
+};
+
+export interface User {
+  id: number;
+  email: string;
+  username: string;
+  full_name?: string;
+  role: string;
+  is_active: boolean;
+  is_superuser: boolean;
+  created_at: string;
+}
+
+export const usersAPI = {
+  getAll: () => api.get<User[]>('/users/'),
+  getById: (id: number) => api.get<User>(`/users/${id}`),
+  create: (data: Partial<User> & { password: string }) => api.post<User>('/users/', data),
+  update: (id: number, data: Partial<User> & { password?: string }) => api.put<User>(`/users/${id}`, data),
+  delete: (id: number) => api.delete(`/users/${id}`),
 };
 
 export default api;

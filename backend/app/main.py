@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from app.database import engine, Base
-from app.routers import transactions, reports, dashboard, upload, auth
+from app.routers import transactions, reports, dashboard, upload, auth, users
 from app.middleware.security import SecurityHeadersMiddleware
 from app.config import settings
 
@@ -75,6 +75,7 @@ app.add_middleware(
 
 # Routers
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
+app.include_router(users.router, prefix="/api/users", tags=["users"])
 app.include_router(transactions.router, prefix="/api/transactions", tags=["transactions"])
 app.include_router(reports.router, prefix="/api/reports", tags=["reports"])
 app.include_router(dashboard.router, prefix="/api/dashboard", tags=["dashboard"])

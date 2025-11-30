@@ -16,7 +16,7 @@ from app.config import settings
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # OAuth2 scheme
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
 
 # Configurações JWT
 SECRET_KEY = settings.secret_key
@@ -72,24 +72,44 @@ async def get_current_user(
     db: Session = Depends(get_db)
 ) -> User:
     """Obter usuário atual a partir do token"""
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authenticated",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    
     payload = verify_token(token, "access")
-    user_id: int = payload.get("sub")
-    if user_id is None:
+    user_id_str = payload.get("sub")
+    
+    if user_id_str is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Could not validate credentials"
         )
+    
+    # Converter string para int
+    try:
+        user_id = int(user_id_str)
+    except (ValueError, TypeError):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials"
+        )
+    
     user = db.query(User).filter(User.id == user_id).first()
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found"
         )
+    
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Inactive user"
         )
+    
     return user
 
 async def get_current_active_user(
@@ -100,6 +120,17 @@ async def get_current_active_user(
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Inactive user"
+        )
+    return current_user
+
+async def get_current_admin_user(
+    current_user: User = Depends(get_current_active_user)
+) -> User:
+    """Obter usuário admin"""
+    if current_user.role != "admin" and not current_user.is_superuser:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not enough permissions"
         )
     return current_user
 

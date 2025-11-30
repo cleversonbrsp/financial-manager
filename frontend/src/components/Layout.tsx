@@ -1,5 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Receipt, FileText, Upload, LogOut, User } from 'lucide-react';
+import { LayoutDashboard, Receipt, FileText, Upload, LogOut, User, Users } from 'lucide-react';
 import { useState } from 'react';
 import { uploadAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
@@ -41,6 +41,7 @@ export default function Layout({ children }: LayoutProps) {
     { path: '/', icon: LayoutDashboard, label: 'Dashboard' },
     { path: '/transactions', icon: Receipt, label: 'Transações' },
     { path: '/reports', icon: FileText, label: 'Relatórios' },
+    ...(user?.role === 'admin' ? [{ path: '/users', icon: Users, label: 'Usuários' }] : []),
   ];
 
   return (

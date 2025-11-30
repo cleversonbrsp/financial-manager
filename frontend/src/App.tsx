@@ -3,8 +3,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import Dashboard from './pages/Dashboard';
 import Transactions from './pages/Transactions';
 import Reports from './pages/Reports';
+import Users from './pages/Users';
 import Login from './pages/Login';
-import Register from './pages/Register';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 
@@ -14,7 +14,7 @@ function App() {
       <Router>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
+          {/* Rota de registro removida - apenas admin pode criar usuários */}
           <Route
             path="/*"
             element={
@@ -25,6 +25,7 @@ function App() {
                     <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/transactions" element={<Transactions />} />
                     <Route path="/reports" element={<Reports />} />
+                    <Route path="/users" element={<Users />} />
                   </Routes>
                 </Layout>
               </ProtectedRoute>

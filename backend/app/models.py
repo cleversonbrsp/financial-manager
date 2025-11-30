@@ -52,12 +52,13 @@ class User(Base):
     full_name = Column(String, nullable=True)
     is_active = Column(Boolean, default=True)
     is_superuser = Column(Boolean, default=False)
+    role = Column(String, default="user")  # admin, user, etc
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     last_login = Column(DateTime(timezone=True), nullable=True)
     
     def __repr__(self):
-        return f"<User(id={self.id}, email='{self.email}', username='{self.username}')>"
+        return f"<User(id={self.id}, email='{self.email}', username='{self.username}', role='{self.role}')>"
 
 class RefreshToken(Base):
     __tablename__ = "refresh_tokens"

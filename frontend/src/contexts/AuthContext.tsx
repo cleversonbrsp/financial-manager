@@ -6,6 +6,7 @@ interface User {
   email: string;
   username: string;
   full_name?: string;
+  role: string;
   is_active: boolean;
 }
 
@@ -65,20 +66,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(response.data);
       setLoading(false);
     } catch (error: any) {
-      console.log('Token inválido ou backend não disponível:', error?.message || error);
       // Token inválido, tentar refresh
       if (currentRefreshToken) {
         try {
           await refreshAccessToken();
           setLoading(false);
         } catch (refreshError: any) {
-          console.log('Refresh falhou, limpando autenticação:', refreshError?.message || refreshError);
           // Refresh falhou, limpar tudo
           clearAuth();
           setLoading(false);
         }
       } else {
-        console.log('Sem refresh token, limpando autenticação');
         clearAuth();
         setLoading(false);
       }
@@ -106,38 +104,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (username: string, password: string) => {
-    console.log('🔐 Iniciando login...');
     const response = await authAPI.login(username, password);
-    console.log('✅ Login bem-sucedido, tokens recebidos');
-    
     const accessToken = response.data.access_token;
     const refreshTokenValue = response.data.refresh_token;
     
-    console.log('💾 Salvando tokens...', {
-      accessToken: accessToken ? accessToken.substring(0, 20) + '...' : 'null',
-      refreshToken: refreshTokenValue ? refreshTokenValue.substring(0, 20) + '...' : 'null'
-    });
-    
-    // Salvar tokens primeiro
+    // Salvar tokens
     setToken(accessToken);
     setRefreshToken(refreshTokenValue);
     localStorage.setItem('access_token', accessToken);
     localStorage.setItem('refresh_token', refreshTokenValue);
     
-    // Verificar se foi salvo
-    const savedToken = localStorage.getItem('access_token');
-    console.log('✅ Token salvo no localStorage:', savedToken ? savedToken.substring(0, 20) + '...' : 'null');
-    
     // Obter dados do usuário passando o token diretamente
     try {
-      console.log('👤 Obtendo dados do usuário...');
       const userResponse = await authAPI.getMe(accessToken);
-      console.log('✅ Dados do usuário obtidos:', userResponse.data);
       setUser(userResponse.data);
     } catch (error: any) {
-      console.error('❌ Erro ao obter dados do usuário após login:', error);
-      console.error('Resposta completa:', error?.response?.data);
-      console.error('Status:', error?.response?.status);
+      console.error('Erro ao obter dados do usuário após login:', error);
       // Se falhar, limpar tokens e relançar erro
       clearAuth();
       throw error;

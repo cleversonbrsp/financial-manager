@@ -4,18 +4,37 @@ __pycache__/
 *$py.class
 *.so
 .Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+venv/
+env/
+ENV/
+.venv
+
+# Database
 *.db
 *.sqlite
 *.sqlite3
+financial_manager.db
 
-# Node
-node_modules/
-dist/
-build/
-*.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+# Environment variables
+.env
+.env.local
+.env.*.local
 
 # IDE
 .vscode/
@@ -23,15 +42,88 @@ yarn-error.log*
 *.swp
 *.swo
 *~
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Frontend build
+frontend/dist/
+frontend/build/
+frontend/.vite/
+
+# Coverage
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath
+*.sage.py
+
+# Spyder
+.spyderproject
+.spyproject
+
+# Rope
+.ropeproject
+
+# mkdocs
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre
+.pyre/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp
 
 # OS
 .DS_Store
 Thumbs.db
 
-# Environment
-.env
-.env.local
+# Docker
+.dockerignore
 
-# Database
-financial_manager.db
+# Kubernetes secrets
+*.secret.yaml
+secrets/
 
+# Backup files
+*.backup
+backup/
+
+# Local configuration
+config.local.py
+settings.local.py

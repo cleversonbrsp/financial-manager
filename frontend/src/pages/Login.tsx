@@ -83,10 +83,7 @@ export default function Login() {
 
         <div className="mt-6 text-center">
           <p className="text-gray-400 text-sm">
-            Não tem uma conta?{' '}
-            <a href="/register" className="text-purple-400 hover:text-purple-300">
-              Criar conta
-            </a>
+            Entre em contato com o administrador para criar uma conta
           </p>
         </div>
       </div>

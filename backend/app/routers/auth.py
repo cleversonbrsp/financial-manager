@@ -19,7 +19,8 @@ from app.auth import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     REFRESH_TOKEN_EXPIRE_DAYS
 )
-from app.schemas import UserCreate, UserResponse, Token, TokenRefresh
+from app.schemas import UserCreate, UserResponse, Token, TokenRefresh, UserUpdate
+from app.utils.password import validate_password_strength
 from app.config import settings
 
 # Rate limiting opcional
@@ -40,39 +41,7 @@ def rate_limit(limit: str):
         return limiter.limit(limit)
     return lambda f: f  # Retorna função sem modificação se rate limiting não disponível
 
-@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
-@rate_limit("5/minute")
-def register(request: Request, user_data: UserCreate, db: Session = Depends(get_db)):
-    """Registrar novo usuário"""
-    # Verificar se email já existe
-    db_user = db.query(User).filter(User.email == user_data.email).first()
-    if db_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
-        )
-    
-    # Verificar se username já existe
-    db_user = db.query(User).filter(User.username == user_data.username).first()
-    if db_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Username already taken"
-        )
-    
-    # Criar usuário
-    hashed_password = get_password_hash(user_data.password)
-    db_user = User(
-        email=user_data.email,
-        username=user_data.username,
-        hashed_password=hashed_password,
-        full_name=user_data.full_name
-    )
-    db.add(db_user)
-    db.commit()
-    db.refresh(db_user)
-    
-    return db_user
+# Rota de registro removida - apenas admin pode criar usuários
 
 @router.post("/login", response_model=Token)
 @rate_limit("10/minute")
@@ -113,12 +82,15 @@ def login(
     
     # Criar tokens
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    # IMPORTANTE: 'sub' deve ser string, não int (python-jose exige)
+    token_data = {"sub": str(user.id), "email": user.email, "username": user.username}
     access_token = create_access_token(
-        data={"sub": user.id, "email": user.email, "username": user.username},
+        data=token_data,
         expires_delta=access_token_expires
     )
+    
     refresh_token = create_refresh_token(
-        data={"sub": user.id}
+        data={"sub": str(user.id)}  # Converter para string
     )
     
     # Salvar refresh token
@@ -132,13 +104,27 @@ def login(
     }
 
 @router.post("/refresh", response_model=Token)
-def refresh_token(token_data: TokenRefresh, db: Session = Depends(get_db)):
+@rate_limit("10/minute")
+def refresh_token(
+    request: Request,
+    token_data: TokenRefresh,
+    db: Session = Depends(get_db)
+):
     """Renovar access token usando refresh token"""
     # Verificar refresh token
     payload = verify_token(token_data.refresh_token, "refresh")
-    user_id: int = payload.get("sub")
+    user_id_str = payload.get("sub")
     
-    if user_id is None:
+    if user_id_str is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token"
+        )
+    
+    # Converter string para int
+    try:
+        user_id = int(user_id_str)
+    except (ValueError, TypeError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid refresh token"
@@ -169,7 +155,7 @@ def refresh_token(token_data: TokenRefresh, db: Session = Depends(get_db)):
     # Criar novo access token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.id, "email": user.email, "username": user.username},
+        data={"sub": str(user.id), "email": user.email, "username": user.username},  # Converter para string
         expires_delta=access_token_expires
     )
     
