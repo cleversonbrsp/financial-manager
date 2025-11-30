@@ -26,6 +26,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copiar código da aplicação
 COPY app/ ./app/
 
+# Copiar scripts de inicialização
+COPY create_admin.py init_db.py ./
+
 # Criar diretório para banco de dados
 RUN mkdir -p /app/data
 
@@ -36,6 +39,11 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD python3 -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"
 
+# Script de inicialização
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 # Comando para iniciar a aplicação
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["python3", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
 
