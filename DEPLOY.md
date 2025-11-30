@@ -2,24 +2,72 @@
 
 ## 🐳 Deploy com Docker
 
-### Build das imagens
+### Pré-requisitos
+
+- Docker e Docker Compose instalados
+- Portas 80 (frontend) e 8000 (backend) disponíveis
+
+### Build e Executar
 
 ```bash
-./scripts/build.sh
-```
+# Build das imagens (sem cache para garantir atualizações)
+docker compose build --no-cache
 
-### Executar com Docker Compose
+# Iniciar containers em background
+docker compose up -d
 
-```bash
-docker-compose up -d
+# Ver logs em tempo real
+docker compose logs -f
+
+# Ver logs de um serviço específico
+docker compose logs -f backend
+docker compose logs -f frontend
 ```
 
 ### Verificar status
 
 ```bash
-docker-compose ps
-docker-compose logs -f
+# Status dos containers
+docker compose ps
+
+# Health checks
+docker compose ps
+# Deve mostrar "healthy" para ambos os serviços
 ```
+
+### Parar e Remover
+
+```bash
+# Parar containers
+docker compose stop
+
+# Parar e remover containers
+docker compose down
+
+# Parar, remover containers e volumes (⚠️ apaga banco de dados)
+docker compose down -v
+```
+
+### Inicialização Automática
+
+O sistema inicializa automaticamente:
+- ✅ Criação das tabelas do banco de dados
+- ✅ Criação do usuário admin padrão (se não existir)
+- ✅ Teste de login do admin
+
+**Credenciais padrão:**
+- Username: `admin`
+- Senha: `admin`
+
+⚠️ **IMPORTANTE**: Altere a senha após o primeiro login!
+
+### Configuração
+
+O `docker-compose.yml` está configurado para:
+- Frontend na porta 80 (proxy nginx)
+- Backend na porta 8000
+- Banco de dados SQLite persistido em `./backend/data/`
+- Frontend usa `/api` como baseURL (proxy nginx)
 
 ## ☸️ Deploy no Kubernetes
 

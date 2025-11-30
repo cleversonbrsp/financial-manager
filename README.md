@@ -131,9 +131,42 @@ A aplicação é compatível com instalação em dispositivos móveis Android:
 - Manifest para instalação
 - Interface responsiva
 
-## 🐳 Deploy
+## 🐳 Deploy com Docker
 
-Veja [DEPLOY.md](DEPLOY.md) para instruções de deploy com Docker e Kubernetes.
+### Executar com Docker Compose
+
+```bash
+# Build e iniciar containers
+docker compose build --no-cache
+docker compose up -d
+
+# Ver logs
+docker compose logs -f
+
+# Parar containers
+docker compose down
+```
+
+### Acessar após deploy
+
+- **Aplicação**: http://localhost
+- **API Docs**: http://localhost:8000/docs
+- **Login**: http://localhost/login
+
+**Credenciais padrão após primeira inicialização:**
+- Username: `admin`
+- Senha: `admin`
+
+⚠️ **IMPORTANTE**: Altere a senha do admin após o primeiro login!
+
+### Notas sobre Docker
+
+- O banco de dados é inicializado automaticamente na primeira execução
+- O usuário admin é criado automaticamente se não existir
+- O banco de dados é persistido em `./backend/data/`
+- O frontend usa proxy nginx para `/api` → backend na porta 8000
+
+Veja [DEPLOY.md](DEPLOY.md) para instruções detalhadas de deploy com Docker e Kubernetes.
 
 ## 🛠️ Tecnologias
 
