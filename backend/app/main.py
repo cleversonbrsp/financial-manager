@@ -2,6 +2,8 @@ from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from datetime import date, datetime
+import json
 from app.database import engine, Base
 from app.routers import transactions, reports, dashboard, upload, auth, users
 from app.middleware.security import SecurityHeadersMiddleware
@@ -40,14 +42,44 @@ else:
 # Middleware de segurança
 app.add_middleware(SecurityHeadersMiddleware)
 
+# Função auxiliar para serializar objetos date/datetime
+def serialize_for_json(obj):
+    """Serializa objetos date e datetime para strings ISO format"""
+    if isinstance(obj, (date, datetime)):
+        return obj.isoformat()
+    elif isinstance(obj, dict):
+        return {k: serialize_for_json(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [serialize_for_json(item) for item in obj]
+    elif isinstance(obj, tuple):
+        return tuple(serialize_for_json(item) for item in obj)
+    return obj
+
 # Handler de erros de validação
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    print(f"ERRO DE VALIDAÇÃO: {exc.errors()}")
+    errors = exc.errors()
+    print(f"ERRO DE VALIDAÇÃO: {errors}")
     print(f"Body recebido: {exc.body}")
+    
+    # Serializar erros para garantir que objetos date/datetime sejam convertidos
+    serialized_errors = serialize_for_json(errors)
+    
+    # Serializar body também, caso contenha objetos date/datetime
+    try:
+        if exc.body:
+            if isinstance(exc.body, (dict, list)):
+                serialized_body = serialize_for_json(exc.body)
+            else:
+                serialized_body = str(exc.body)
+        else:
+            serialized_body = None
+    except Exception:
+        serialized_body = str(exc.body) if exc.body else None
+    
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={"detail": exc.errors(), "body": str(exc.body)},
+        content={"detail": serialized_errors, "body": serialized_body},
     )
 
 # Handler de erros gerais
