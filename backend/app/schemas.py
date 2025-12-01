@@ -1,6 +1,6 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from datetime import date, datetime
-from typing import Optional
+from typing import Optional, Union
 from app.models import TransactionType
 
 class TransactionBase(BaseModel):
@@ -16,13 +16,29 @@ class TransactionCreate(TransactionBase):
     pass
 
 class TransactionUpdate(BaseModel):
+    model_config = ConfigDict(validate_assignment=True)
+    
     type: Optional[TransactionType] = None
     subtype: Optional[str] = None
     description: Optional[str] = None
-    amount: Optional[float] = Field(None, gt=0)
+    amount: Optional[float] = Field(default=None, gt=0)
     date: Optional[date] = None
     category: Optional[str] = None
     notes: Optional[str] = None
+    
+    @field_validator('date', mode='before')
+    @classmethod
+    def parse_date(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, str):
+            try:
+                return datetime.strptime(v, '%Y-%m-%d').date()
+            except ValueError:
+                raise ValueError(f"Invalid date format: {v}. Expected YYYY-MM-DD")
+        if isinstance(v, date):
+            return v
+        return v
 
 class Transaction(TransactionBase):
     id: int
